@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>My Vue.js App</title>
+  <!-- Load Vue.js via CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</head>
+<body>
+  <div id="app" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
+  <h1>Roll Dice</h1>
+  <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 20px;">
+      <div v-for="(die, index) in dice" :key="index" style="display: grid; grid-template-columns: 1fr 1fr 1fr; grid-gap: 10px; align-items: center;">
+        <select :id="'dice-select-' + index" v-model="die.selectedDie" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; display: block;">
+          <option value="4">d4</option>
+          <option value="6">d6</option>
+          <option value="8">d8</option>
+          <option value="12">d12</option>
+          <option value="20">d20</option>
+          <option value="100">d100</option>
+        </select>
+        <div style="display: flex; justify-content: center; align-items: center; width: 50px; height: 50px; border: 1px solid black; text-align: center; font-size: 24px;">{{ die.rolls.join(',') }}</div>
+        <button v-on:click="removeDie(index)" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer;">-</button>
+      </div>
+    </div>
+    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+      <button v-on:click="addDie" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-right: 10px;">+</button>
+      <button v-on:click="rollDice" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-left: 10px; flex-grow: 1;">Roll Dice</button>
+    </div>
+    <h2 style="font-size: 36px; margin-top: 10px;">{{ rolls }}</h2>
+  </div>
+
+  
+  <!-- FILEPATH: /home/thomas/Documents/SWRandomizer/index.html -->
+  <script>
+    /**
+     * Vue app for rolling dice.
+     * @namespace
+     */
+    var app = new Vue({
+      el: '#app',
+      data: {
+        rolls: null,
+        dice: [{ selectedDie: 6, rolls: [], total: 0 }]
+      },
+      methods: {
+        /**
+         * Rolls the dice and updates the rolls and totals.
+         */
+        rollDice: function () {
+          var totalRolls = [];
+          var total = 0;
+          for (var i = 0; i < this.dice.length; i++) {
+            var die = this.dice[i];
+            var rolls = [];
+            var diceCount = 1;
+            for (var j = 0; j < diceCount; j++) {
+              var roll = Math.floor(Math.random() * die.selectedDie) + 1;
+              rolls.push(roll);
+              totalRolls.push(roll);
+              total += roll;
+            }
+            die.rolls = rolls;
+            die.total = total;
+          }
+          if (totalRolls.length > 1) {
+            this.rolls = totalRolls.join('+') + '=' + total;
+          } else {
+            this.rolls = total;
+          }
+        },
+        /**
+         * Adds a new die to the list of dice.
+         */
+        addDie: function () {
+          this.dice.push({ selectedDie: 6, rolls: [], total: 0 });
+        },
+        /**
+         * Removes a die from the list of dice.
+         * @param {number} index - The index of the die to remove.
+         */
+        removeDie: function (index) {
+          this.dice.splice(index, 1);
+        }
+      }
+    })
+  </script>
+
+<style>
+  .card {
+    font-size: 72px;
+    text-align: center;
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 5px;
+    border: none;
+  }
+
+  .hand {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    list-style: none;
+    padding: 0;
+  }
+
+</style>
+
+<div id="app2" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
+  <h1>Draw Cards</h1>
+  <div>
+  <button v-on:click="resetDeck()" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer; margin-top: 20px; ">Shuffle</button>
+  <button v-on:click="reduceCards()" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer;  margin-left: 10px">-</button>
+    <span style="font-size: 24px; margin: 0 10px;">{{ numCards }}</span>
+    <button v-on:click="numCards++" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">+</button>
+    <button v-on:click="drawCards()" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-left: 10px;">Draw Cards</button>
+  </div>
+
+  <ul class="hand">
+    <li v-for="card in cards" class="card" v-bind:style="{ color: getCardColor(card) }">{{ card.symbol }}</li>
+  </ul>
+    <p v-if="shuffled">Deck shuffled!</p>
+  </div>
+<!-- Your custom JavaScript code goes here -->
+<script>
+    // Initialize Vue.js
+    var app = new Vue({
+      el: '#app2',
+      data: {
+        cards: [],
+        deck: [],
+        numCards: 1,
+        shuffled: false,
+      },
+      methods: {
+        drawCards: function() {
+          var numCards = parseInt(this.numCards);
+          if (numCards > this.deck.length) this.resetDeck();
+          // reset deck if a joker is in the hand
+          for (var i = 0; i < this.cards.length; i++) {
+            if (this.cards[i].suit === 'joker') {
+              this.resetDeck();
+              break;
+            }
+          }
+          this.cards = [];
+          for (var i = 0; i < numCards; i++) {
+            var index = Math.floor(Math.random() * this.deck.length);
+            var card = this.deck.splice(index, 1)[0];
+            this.cards.push(card);
+          }
+        },
+        reduceCards: function(){
+          if(this.numCards > 1){
+            this.numCards--;
+          }
+        },
+        resetDeck: function() {
+          this.shuffled = true;
+          setTimeout(() => {
+            this.shuffled = false;
+          }, 1000);
+          this.cards = [];
+          this.deck = [
+            { suit: 'hearts', symbol: '🂱' }, { suit: 'hearts', symbol: '🂲' }, { suit: 'hearts', symbol: '🂳' }, { suit: 'hearts', symbol: '🂴' }, { suit: 'hearts', symbol: '🂵' }, { suit: 'hearts', symbol: '🂶' }, { suit: 'hearts', symbol: '🂷' }, { suit: 'hearts', symbol: '🂸' }, { suit: 'hearts', symbol: '🂹' }, { suit: 'hearts', symbol: '🂺' }, { suit: 'hearts', symbol: '🂻' }, { suit: 'hearts', symbol: '🂽' }, { suit: 'hearts', symbol: '🂾' },
+            { suit: 'diamonds', symbol: '🃁' }, { suit: 'diamonds', symbol: '🃂' }, { suit: 'diamonds', symbol: '🃃' }, { suit: 'diamonds', symbol: '🃄' }, { suit: 'diamonds', symbol: '🃅' }, { suit: 'diamonds', symbol: '🃆' }, { suit: 'diamonds', symbol: '🃇' }, { suit: 'diamonds', symbol: '🃈' }, { suit: 'diamonds', symbol: '🃉' }, { suit: 'diamonds', symbol: '🃊' }, { suit: 'diamonds', symbol: '🃋' }, { suit: 'diamonds', symbol: '🃍' }, { suit: 'diamonds', symbol: '🃎' },
+            { suit: 'clubs', symbol: '🃑' }, { suit: 'clubs', symbol: '🃒' }, { suit: 'clubs', symbol: '🃓' }, { suit: 'clubs', symbol: '🃔' }, { suit: 'clubs', symbol: '🃕' }, { suit: 'clubs', symbol: '🃖' }, { suit: 'clubs', symbol: '🃗' }, { suit: 'clubs', symbol: '🃘' }, { suit: 'clubs', symbol: '🃙' }, { suit: 'clubs', symbol: '🃚' }, { suit: 'clubs', symbol: '🃛' }, { suit: 'clubs', symbol: '🃝' }, { suit: 'clubs', symbol: '🃞' },
+            { suit: 'spades', symbol: '🂡' }, { suit: 'spades', symbol: '🂢' }, { suit: 'spades', symbol: '🂣' }, { suit: 'spades', symbol: '🂤' }, { suit: 'spades', symbol: '🂥' }, { suit: 'spades', symbol: '🂦' }, { suit: 'spades', symbol: '🂧' }, { suit: 'spades', symbol: '🂨' }, { suit: 'spades', symbol: '🂩' }, { suit: 'spades', symbol: '🂪' }, { suit: 'spades', symbol: '🂫' }, { suit: 'spades', symbol: '🂭' }, { suit: 'spades', symbol: '🂮' }, { suit: 'joker', symbol: '🃏'},{ suit: 'joker', symbol: '🃏'}
+          ];
+        },
+        getCardColor: function(card) {
+          if (card.suit === 'hearts' || card.suit === 'diamonds') {
+            return 'red';
+          } else {
+            return 'black';
+          }
+        }
+      }
+    });
+    </script>
+
+</body>
+</html>
