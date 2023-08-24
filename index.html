@@ -7,95 +7,103 @@
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 </head>
 <body>
-  <div id="app" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
+  <div id="app_dice" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
   <h1>Roll Dice</h1>
   <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 20px;">
       <div v-for="(die, index) in dice" :key="index" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; grid-gap: 5px; align-items: center;">
-        <select :id="'dice-select-' + index" v-model="die.selectedDie" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; display: block;">
-          <option value="4">d4</option>
-          <option value="6">d6</option>
-          <option value="8">d8</option>
-          <option value="10">d10</option>
-          <option value="12">d12</option>
-          <option value="20">d20</option>
-          <option value="100">d100</option>
-        </select>
-        <div style="display: flex; justify-content: center; align-items: center; width: 50px; height: 50px; border: 1px solid black; text-align: center; font-size: 24px;">{{ printDie(index) }}</div>
-        <button v-on:click="rollDie(index)" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; width:50px;">⟳</button>
-        <button v-on:click="removeDie(index)" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer; width:50px;">-</button>
-      </div>
-    </div>
-    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-      <button v-on:click="addDie" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-right: 10px;">+</button>
-      <button v-on:click="rollDice" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-left: 10px; flex-grow: 1;">Roll Dice</button>
-    </div>
-    <h2 style="font-size: 36px; margin-top: 10px;">{{ rolls }}</h2>
-  </div>
+        
+              <div style="display: flex;">
+              <select :id="'dice-select-' + index" v-model="die.selectedDie" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; display: block;">
+                <option value="4">d4</option>
+                <option value="6">d6</option>
+                <option value="8">d8</option>
+                <option value="10">d10</option>
+                <option value="12">d12</option>
+                <option value="20">d20</option>
+                <option value="100">d100</option>
+              </select>
+              <label style="font-size: 24px; margin-left: 5px;">
+                <input type="checkbox" v-model="die.explosion" style="margin-right: 10px;">*
+              </label>
+            </div>
+              <div style="display: flex; justify-content: center; align-items: center; width: 50px; height: 50px; border: 1px solid black; text-align: center; font-size: 24px;">{{ printDie(index) }}</div>
+              <button v-on:click="rollDie(index)" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; width:50px;">⟳</button>
+              <button v-on:click="removeDie(index)" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer; width:50px;">-</button>
+            </div>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <button v-on:click="addDie" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-right: 10px;">+</button>
+            <button v-on:click="rollDice" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-left: 10px; flex-grow: 1;">Roll Dice</button>
+          </div>
+          <h2 style="font-size: 36px; margin-top: 10px;">{{ rolls }}</h2>
+        </div>
 
-  
-  <!-- FILEPATH: /home/thomas/Documents/SWRandomizer/index.html -->
-  <script>
-    /**
-     * Vue app for rolling dice.
-     * @namespace
-     */
-    var app = new Vue({
-      el: '#app',
-      data: {
-        dice: [{ selectedDie: 6, rolls: [] }]
-      },
-      computed: {
-        /**
-         * Fills the rolls array for each die.
-         * @returns {Array} - The rolls array for each die.
-         */
-        rolls: function () {
-          var totalRolls = [];
-          var total=0;
-          for (var i = 0; i < this.dice.length; i++) {
-            for (var j = 0; j < this.dice[i].rolls.length; j++) {
-              var die = this.dice[i].rolls[j];
-              totalRolls.push(die);
-              total += die;
-            }
-          }
-          if (totalRolls.length > 1) {
-            return totalRolls.join('+') + '=' + total;
-          } else {
-            return total;
-          }
-        }
-      },
-      methods: {
-        printDie: function(dieIndex){
-          var totalRolls = [];
-          var total=0;
-          let nroll = this.dice[dieIndex].rolls.length;
-          for (var j = 0; j < nroll; j++) {
-            var die = this.dice[dieIndex].rolls[j];
-            totalRolls.push(die);
-            total += die;
-          }
-          if (totalRolls.length==0) return "";
-          var stars = '';
-          for (var i = 0; i < nroll-1; i++) {
-            stars += '*';
-          }
-          return total +stars;
-        },
-        /**
-         * Rolls a single die and returns the roll value.
-         */
-        rollDie: function (dieIndex) {
-          this.dice[dieIndex].rolls=[];
-          var selectedDie = this.dice[dieIndex].selectedDie;
-          var res=selectedDie;
-          while(res==selectedDie){
-            res = Math.floor(Math.random() * selectedDie) + 1;
-            this.dice[dieIndex].rolls.push(res);
-          }
-          //this.dice[dieIndex].roll=Math.floor(Math.random() * selectedDie) + 1;
-        },
+        
+        <!-- FILEPATH: /home/thomas/Documents/SWRandomizer/index.html -->
+        <script>
+          /**
+           * Vue app for rolling dice.
+           * @namespace
+           */
+          var app_dice = new Vue({
+            el: '#app_dice',
+            data: {
+              dice: [{ selectedDie: 6, rolls: [], explosion: true }]
+            },
+            computed: {
+              /**
+               * Fills the rolls array for each die.
+               * @returns {Array} - The rolls array for each die.
+               */
+              rolls: function () {
+                var totalRolls = [];
+                var total=0;
+                for (var i = 0; i < this.dice.length; i++) {
+                  for (var j = 0; j < this.dice[i].rolls.length; j++) {
+                    var die = this.dice[i].rolls[j];
+                    totalRolls.push(die);
+                    total += die;
+                  }
+                }
+                if (totalRolls.length > 1) {
+                  return totalRolls.join('+') + '=' + total;
+                } else {
+                  return total;
+                }
+              }
+            },
+            methods: {
+              printDie: function(dieIndex){
+                var totalRolls = [];
+                var total=0;
+                let nroll = this.dice[dieIndex].rolls.length;
+                for (var j = 0; j < nroll; j++) {
+                  var die = this.dice[dieIndex].rolls[j];
+                  totalRolls.push(die);
+                  total += die;
+                }
+                if (totalRolls.length==0) return "";
+                var stars = '';
+                for (var i = 0; i < nroll-1; i++) {
+                  stars += '*';
+                }
+                return total +stars;
+              },
+              /**
+               * Rolls a single die and returns the roll value.
+               */
+              rollDie: function (dieIndex) {
+                this.dice[dieIndex].rolls=[];
+                var selectedDie = this.dice[dieIndex].selectedDie;
+                var res=selectedDie;
+                while(res==selectedDie){
+                  res = Math.floor(Math.random() * selectedDie) + 1;
+                  this.dice[dieIndex].rolls.push(res);
+                  if (! this.dice[dieIndex].explosion ){
+                    break;
+                  }
+                }
+              },
 
         /**
          * Rolls the dice and updates the rolls and totals.
@@ -110,7 +118,7 @@
          * Adds a new die to the list of dice.
          */
         addDie: function () {
-          this.dice.push({ selectedDie: 6, rolls: []});
+          this.dice.push({ selectedDie: 6, rolls: [], explosion: true});
         },
         /**
          * Removes a die from the list of dice.
@@ -119,6 +127,52 @@
         removeDie: function (index) {
           this.dice.splice(index, 1);
         }
+      }
+    })
+  </script>
+
+<div id="app_fate" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
+  <h1>Fate Dice</h1>
+    <div><button v-on:click="rollFateDice" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Roll Fate Dice</button><span style="margin-left:20px; font-size: 24px; ">{{ action_rolls }}</span></div>
+  </div>
+
+  
+  <!-- FILEPATH: /home/thomas/Documents/SWRandomizer/index.html -->
+  <script>
+    /**
+     * Vue app for rolling dice.
+     * @namespace
+     */
+    var app_fate = new Vue({
+      el: '#app_fate',
+      data: {
+        action_rolls: "⊡ ⊡ ⊡ ⊡ = 0",
+        opposition_rolls: "⊡ ⊡ ⊡ ⊡ = 0",
+      },
+      computed: {
+        
+      },
+      methods: {
+        // roll 4 fate dice (result: +, -, or blank) for both action and opposition
+        // this.action_rolls is a string containing the results of the action roll and the sum (ex: '+-+_ = +1')
+        // this.opposition_rolls is the same for opposition
+        rollFateDice: function () {
+          var actionRolls = [];
+          var oppositionRolls = [];
+          var actionTotal = 0;
+          var oppositionTotal = 0;
+          let map = ['⊟','⊡','⊞'];
+          for (var i = 0; i < 4; i++) {
+            var roll = Math.floor(Math.random() * 3) - 1;
+            actionRolls.push(map[roll+1]);
+            actionTotal += roll;
+            roll = Math.floor(Math.random() * 3) - 1;
+            oppositionRolls.push(map[roll+1]);
+            oppositionTotal += roll;
+          }
+          this.action_rolls = actionRolls.join(' ') + ' = ' + actionTotal;
+          this.opposition_rolls = oppositionRolls.join(' ') + ' = ' + oppositionTotal;
+        },
       }
     })
   </script>
@@ -147,7 +201,7 @@
 
 </style>
 
-<div id="app2" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
+<div id="app_card" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
   <h1>Draw Cards</h1>
   <div>
   <button v-on:click="resetDeck()" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer; margin-top: 20px; ">Shuffle</button>
@@ -165,8 +219,8 @@
 <!-- Your custom JavaScript code goes here -->
 <script>
     // Initialize Vue.js
-    var app = new Vue({
-      el: '#app2',
+    var app_dard = new Vue({
+      el: '#app_card',
       data: {
         cards: [],
         deck: [],
