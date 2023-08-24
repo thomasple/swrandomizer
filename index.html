@@ -9,8 +9,8 @@
 <body>
   <div id="app_dice" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
   <h1>Roll Dice</h1>
-  <div style="display: grid; grid-template-columns: repeat(3, 1fr); grid-gap: 20px;">
-      <div v-for="(die, index) in dice" :key="index" style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; grid-gap: 5px; align-items: center;">
+  <div style="display: grid; grid-template-columns: repeat(1, 1fr); grid-gap: 20px;">
+      <div v-for="(die, index) in dice" :key="index" style="display: flex; grid-gap: 5px; align-items: center;">
         
               <div style="display: flex;">
               <select :id="'dice-select-' + index" v-model="die.selectedDie" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; display: block;">
@@ -22,18 +22,18 @@
                 <option value="20">d20</option>
                 <option value="100">d100</option>
               </select>
-              <label style="font-size: 24px; margin-left: 5px;">
+              <label style="font-size: 24px; margin-left: 5px; display: flex; flex-direction: column;">
                 <input type="checkbox" v-model="die.explosion" style="margin-right: 10px;">*
               </label>
             </div>
-              <div style="display: flex; justify-content: center; align-items: center; width: 50px; height: 50px; border: 1px solid black; text-align: center; font-size: 24px;">{{ printDie(index) }}</div>
+              <div style="display: flex; flex-grow:1; justify-content: center; align-items: center; width: 100px; border-radius: 10px; height: 40px; border: 4px solid #4CAF50; text-align: center; font-size: 24px;">{{ printDie(index) }}</div>
               <button v-on:click="rollDie(index)" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; width:50px;">⟳</button>
               <button v-on:click="removeDie(index)" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer; width:50px;">-</button>
             </div>
           </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
             <button v-on:click="addDie" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-right: 10px;">+</button>
-            <button v-on:click="rollDice" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-left: 10px; flex-grow: 1;">Roll Dice</button>
+            <button v-on:click="rollDice" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-left: 10px; ">Roll Dice</button>
           </div>
           <h2 style="font-size: 36px; margin-top: 10px;">{{ rolls }}</h2>
         </div>
@@ -82,6 +82,11 @@
                   totalRolls.push(die);
                   total += die;
                 }
+                //if (totalRolls.length > 1) {
+                //  return totalRolls.join('+') + '=' + total;
+                //} else {
+                //  return total;
+                //}
                 if (totalRolls.length==0) return "";
                 var stars = '';
                 for (var i = 0; i < nroll-1; i++) {
@@ -133,7 +138,7 @@
 
 <div id="app_fate" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
   <h1>Fate Dice</h1>
-    <div><button v-on:click="rollFateDice" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Roll Fate Dice</button><span style="margin-left:20px; font-size: 24px; ">{{ action_rolls }}</span></div>
+    <div><button v-on:click="rollFateDice" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Roll Fate Dice</button><span style="margin-left:20px; font-size: 40px; ">{{ action_rolls }}</span></div>
   </div>
 
   
