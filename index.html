@@ -26,7 +26,7 @@
                 <input type="checkbox" v-model="die.explosion" style="margin-right: 10px;">*
               </label>
             </div>
-              <div style="display: flex; flex-grow:1; justify-content: center; align-items: center; width: 100px; border-radius: 10px; height: 40px; border: 4px solid #4CAF50; text-align: center; font-size: 24px;">{{ printDie(index) }}</div>
+              <div  style="display: flex; flex-grow:1; justify-content: center; align-items: center; width: 100px; border-radius: 10px; height: 40px; border: 4px solid #4CAF50; text-align: center; font-size: 24px;"><span :class="{ rolling: die.rolling }">{{ printDie(index) }}</span></div>
               <button v-on:click="rollDie(index)" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; width:50px;">⟳</button>
               <button v-on:click="removeDie(index)" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer; width:50px;">-</button>
             </div>
@@ -48,7 +48,7 @@
           var app_dice = new Vue({
             el: '#app_dice',
             data: {
-              dice: [{ selectedDie: 6, rolls: [], explosion: true }]
+              dice: [{ selectedDie: 6, rolls: [], explosion: true, rolling: false }],
             },
             computed: {
               /**
@@ -74,6 +74,7 @@
             },
             methods: {
               printDie: function(dieIndex){
+                if (this.dice[dieIndex].rolling) return "🎲";
                 var totalRolls = [];
                 var total=0;
                 let nroll = this.dice[dieIndex].rolls.length;
@@ -98,6 +99,11 @@
                * Rolls a single die and returns the roll value.
                */
               rollDie: function (dieIndex) {
+                if(this.dice[dieIndex].rolling) return;
+                this.dice[dieIndex].rolling = true;
+                setTimeout(() => {
+                  this.dice[dieIndex].rolling = false;
+                }, 600);
                 this.dice[dieIndex].rolls=[];
                 var selectedDie = this.dice[dieIndex].selectedDie;
                 var res=selectedDie;
@@ -108,6 +114,7 @@
                     break;
                   }
                 }
+                
               },
 
         /**
@@ -123,7 +130,7 @@
          * Adds a new die to the list of dice.
          */
         addDie: function () {
-          this.dice.push({ selectedDie: 6, rolls: [], explosion: true});
+          this.dice.push({ selectedDie: 6, rolls: [], explosion: true, rolling:false});
         },
         /**
          * Removes a die from the list of dice.
@@ -209,6 +216,14 @@
   }
   button:active {
     opacity: 0.5;
+  }
+  .rolling{
+    animation: spin 0.6s linear infinite;
+  }
+  @keyframes spin {
+    0% { transform: translateX(-30px) translateY(-30px) rotate(0deg) ; }
+    33% { transform: translateX(-20px) translateY(0px) rotate(360deg) ; }
+    100% { transform: translateX(30px) translateY(0px) rotate(720deg) ; }
   }
 </style>
 
