@@ -1,121 +1,241 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <title>Savage Worlds Randomizer</title>
+  <title>Tom's TTRPG Randomizer</title>
   <!-- Load Vue.js via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+  <link rel="stylesheet" href="https://cdn.rawgit.com/fponticelli/dicefont/fc6b8c47/dist/dicefont/dicefont.css">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="manifest" href="/site.webmanifest">
 </head>
-<body>
-  <div id="app_dice" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
-  <h1>Roll Dice</h1>
-  <div style="display: grid; grid-template-columns: repeat(1, 1fr); grid-gap: 20px;">
-      <div v-for="(die, index) in dice" :key="index" style="display: flex; grid-gap: 5px; align-items: center;">
-        
-              <div style="display: flex;">
-              <select :id="'dice-select-' + index" v-model="die.selectedDie" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; display: block;">
-                <option value="4">d4</option>
-                <option value="6">d6</option>
-                <option value="8">d8</option>
-                <option value="10">d10</option>
-                <option value="12">d12</option>
-                <option value="20">d20</option>
-                <option value="100">d100</option>
-              </select>
-              <label style="font-size: 24px; margin-left: 5px; display: flex; flex-direction: column;">
-                <input type="checkbox" v-model="die.explosion" style="margin-right: 10px;">*
-              </label>
-            </div>
-              <div  style="display: flex; flex-grow:1; justify-content: center; align-items: center; width: 100px; border-radius: 10px; height: 40px; border: 4px solid #4CAF50; text-align: center; font-size: 24px;"><span :class="{ rolling: die.rolling }">{{ printDie(index) }}</span></div>
-              <button v-on:click="rollDie(index)" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; width:50px;">⟳</button>
-              <button v-on:click="removeDie(index)" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer; width:50px;">-</button>
-            </div>
-          </div>
-          <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
-            <button v-on:click="addDie" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-right: 10px;">+</button>
-            <button v-on:click="rollDice" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-left: 10px; ">Roll Dice</button>
-          </div>
-          <h2 style="font-size: 36px; margin-top: 10px;">{{ rolls }}</h2>
-        </div>
 
-        
-        <!-- FILEPATH: /home/thomas/Documents/SWRandomizer/index.html -->
-        <script>
-          /**
-           * Vue app for rolling dice.
-           * @namespace
-           */
-          var app_dice = new Vue({
-            el: '#app_dice',
-            data: {
-              dice: [{ selectedDie: 6, rolls: [], explosion: true, rolling: false }],
-            },
-            computed: {
-              /**
-               * Fills the rolls array for each die.
-               * @returns {Array} - The rolls array for each die.
-               */
-              rolls: function () {
-                var totalRolls = [];
-                var total=0;
-                for (var i = 0; i < this.dice.length; i++) {
-                  for (var j = 0; j < this.dice[i].rolls.length; j++) {
-                    var die = this.dice[i].rolls[j];
-                    totalRolls.push(die);
-                    total += die;
-                  }
-                }
-                if (totalRolls.length > 1) {
-                  return totalRolls.join('+') + '=' + total;
-                } else {
-                  return total;
-                }
+<body>
+  <!---------------------------------------------------------------------------------------------->
+  <!-- ROLL DICE -->
+  <style>
+    @font-face {
+      font-family: SWDice;
+      src: url("./EotE_Symbol-Regular_v1.otf") format("opentype");
+    }
+
+    body {
+      background-color: rgb(65, 65, 65);
+    }
+
+    button:hover {
+      opacity: 0.9;
+    }
+
+    button:active {
+      opacity: 0.5;
+    }
+
+    .rolling {
+      animation: spin 0.62s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: translateX(-30px) translateY(-30px) rotate(0deg);
+      }
+
+      33% {
+        transform: translateX(-20px) translateY(10px) rotate(360deg);
+      }
+
+      66% {
+        transform: translateX(10px) translateY(-10px) rotate(540deg);
+      }
+
+      100% {
+        transform: translateX(30px) translateY(0px) rotate(720deg);
+      }
+    }
+
+    .app {
+      font-family: sans-serif;
+      background-color: white;
+      padding: 20px;
+      border-radius: 10px;
+    }
+
+    .app:last-of-type {
+      margin-bottom: 50px;
+    }
+
+    .btnoff{
+      background-color: Silver;
+      color: white;
+    }
+    .btnon{
+      background-color: #4CAF50;
+      color: white;
+    }
+  </style>
+  <div id="app_dice" class="app"
+    style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
+    <h1 style="display: flex;">
+      <div style="transform: rotate(-15deg); margin-right: 5px;"><i class='df-small-dot-d6-6'></i></div>
+       Dice Rolls
+       <div style="transform: rotate(25deg); margin-left: 5px;"><i class='df-d20-20'></i></div>
+    </h1>
+    <h3>Add dice to your pool:</h3>
+    <div style="display: flex; margin-bottom: 20px;">
+      <button v-for="(dieType, i) in dieTypes" :key="i"
+        style="font-size: 16px; padding: 10px; border-radius: 5px; border: none; cursor: pointer; width:55px; height:55px; margin: 0px 10px; background-color: rgb(218, 226, 236); font-weight: bold;"
+        v-on:click="addDie(dieType)"
+        > 
+        d{{dieType}}
+      </button>
+    </div>
+    <div style="max-width: 400px; width:100%;">
+      <div style="display: grid; grid-template-columns: repeat(1, 1fr); grid-gap: 20px; width: 100%;">
+        <div v-for="(die, index) in dice" :key="index" style="display: flex; grid-gap: 5px; align-items: center;">
+
+          <div style="display: flex;">
+            <select :id="'dice-select-' + index" v-model="die.selectedDie"
+              style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; display: block;">
+              <option v-for="(dieType, i) in dieTypes" :key="i" :value="dieType"> d{{ dieType }}</option> 
+            </select>
+            <button style="font-family: SWDice; font-size: 24px; margin-left: 5px; border-radius: 5px;  border: none; cursor: pointer; display: block;"
+            title="dice aces/explosions"
+            v-if="die.selectedDie!=100"
+            v-on:click="die.explosion = !die.explosion"
+            :class="{ btnoff: !die.explosion, btnon: die.explosion}"
+              >s</button>
+            <!-- <label style="font-size: 24px; margin-left: 5px; display: flex; flex-direction: column;" -->
+              <!-- v-if="die.selectedDie!=100"> -->
+              <!-- <input type="checkbox" v-model="die.explosion" style="margin-right: 10px;" title="dice aces/explosions">* -->
+            <!-- </label> -->
+          </div>
+          <div
+            style="display: flex; flex-grow:1; justify-content: center; align-items: center; width: 100px; border-radius: 10px; height: 50px; border: 4px solid #4CAF50; text-align: center; font-size: 28px;">
+            <span :class="{ rolling: die.rolling }" v-html="printDie(index)"></span>
+          </div>
+          <button v-on:click="rollDie(index)"
+            style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; width:50px;"
+            title="reroll die">⟳</button>
+          <button v-on:click="removeDie(index)"
+            style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer; width:50px;"
+            title="remove die">-</button>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
+        <!-- <button v-on:click="addDie()"
+          style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-right: 10px;"
+          title="add a die to the pool">+</button> -->
+        <button v-on:click="rollDice"
+          style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-left: 10px; flex-grow: 1;">Roll
+          Dice</button>
+        <button v-on:click="removeDice"
+          style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer; margin-top: 20px; margin-left: 10px;"
+          title="remove all dice">reset</button>
+      </div>
+      <h2 style="font-size: 36px; margin-top: 30px; height:50px;" v-html="rolls"></h2>
+    </div>
+  </div>
+
+
+  <!-- FILEPATH: /home/thomas/Documents/SWRandomizer/index.html -->
+  <script>
+    /**
+     * Vue app for rolling dice.
+     * @namespace
+     */
+    var app_dice = new Vue({
+      el: '#app_dice',
+      data: {
+        dice: [],
+        dieTypes: [4, 6, 8, 10, 12, 20, 100],
+      },
+      computed: {
+        /**
+         * Fills the rolls array for each die.
+         * @returns {Array} - The rolls array for each die.
+         */
+        rolls: function () {
+          var totalRolls = [];
+          var total = 0;
+          for (var i = 0; i < this.dice.length; i++) {
+            for (var j = 0; j < this.dice[i].rolls.length; j++) {
+              var die = this.dice[i].rolls[j];
+              var diestring = this.dieString(this.dice[i].selectedDie, this.dice[i].rolls[j]);
+              totalRolls.push(diestring);
+              total += die;
+            }
+          }
+          if (totalRolls.length > 1) {
+            return totalRolls.join('+') + ' = ' + total;
+          } else {
+            return totalRolls[0];
+          }
+        }
+      },
+      methods: {
+        canExplode: function (die) {
+          return die.explosion && die.selectedDie != 100;
+        },
+        dieString: function (die, roll, rolling = false) {
+          if (die == 6) return `<i class='df-small-dot-d6-${roll}'></i>`
+          if (die == 100) {
+            if (rolling) return `<i class='df-d10-${roll}'></i>`
+            // tens = Math.floor(roll / 10);
+            // ones = roll % 10;
+            // return `<i class='df-d10-${tens}'></i><i class='df-d10-${ones}'></i>`
+            return roll
+          }
+          return `<i class='df-d${die}-${roll}'></i>`
+        },
+        printDie: function (dieIndex) {
+          // if (this.dice[dieIndex].rolling) return "🎲";
+          if (this.dice[dieIndex].rolling) return this.dieString(this.dice[dieIndex].selectedDie, 2, true);
+          var totalRolls = [];
+          var total = 0;
+          let nroll = this.dice[dieIndex].rolls.length;
+          for (var j = 0; j < nroll; j++) {
+            var die = this.dice[dieIndex].rolls[j];
+            var diestring = this.dieString(this.dice[dieIndex].selectedDie, this.dice[dieIndex].rolls[j]);
+            totalRolls.push(diestring);
+            total += die;
+          }
+          if (totalRolls.length > 1) {
+            return totalRolls.join('') // + '=' + total;
+          } else {
+            return totalRolls[0];
+          }
+          // if (totalRolls.length == 0) return "";
+          // var stars = '';
+          // for (var i = 0; i < nroll - 1; i++) {
+          //   stars += '*';
+          // }
+          // return total + stars;
+        },
+        /**
+         * Rolls a single die and returns the roll value.
+         */
+        rollDie: function (dieIndex) {
+          if (this.dice[dieIndex].rolling) return;
+          this.dice[dieIndex].rolls = [];
+          this.dice[dieIndex].rolling = true;
+
+          var selectedDie = this.dice[dieIndex].selectedDie;
+          setTimeout(() => {
+            var res = selectedDie;
+            while (res == selectedDie) {
+              res = Math.floor(Math.random() * selectedDie) + 1;
+              this.dice[dieIndex].rolls.push(res);
+              if (!this.canExplode(this.dice[dieIndex])) {
+                break;
               }
-            },
-            methods: {
-              printDie: function(dieIndex){
-                if (this.dice[dieIndex].rolling) return "🎲";
-                var totalRolls = [];
-                var total=0;
-                let nroll = this.dice[dieIndex].rolls.length;
-                for (var j = 0; j < nroll; j++) {
-                  var die = this.dice[dieIndex].rolls[j];
-                  totalRolls.push(die);
-                  total += die;
-                }
-                //if (totalRolls.length > 1) {
-                //  return totalRolls.join('+') + '=' + total;
-                //} else {
-                //  return total;
-                //}
-                if (totalRolls.length==0) return "";
-                var stars = '';
-                for (var i = 0; i < nroll-1; i++) {
-                  stars += '*';
-                }
-                return total +stars;
-              },
-              /**
-               * Rolls a single die and returns the roll value.
-               */
-              rollDie: function (dieIndex) {
-                if(this.dice[dieIndex].rolling) return;
-                this.dice[dieIndex].rolling = true;
-                setTimeout(() => {
-                  this.dice[dieIndex].rolling = false;
-                }, 600);
-                this.dice[dieIndex].rolls=[];
-                var selectedDie = this.dice[dieIndex].selectedDie;
-                var res=selectedDie;
-                while(res==selectedDie){
-                  res = Math.floor(Math.random() * selectedDie) + 1;
-                  this.dice[dieIndex].rolls.push(res);
-                  if (! this.dice[dieIndex].explosion ){
-                    break;
-                  }
-                }
-                
-              },
+            }
+            this.dice[dieIndex].rolling = false;
+          }, 600);
+
+        },
 
         /**
          * Rolls the dice and updates the rolls and totals.
@@ -125,12 +245,17 @@
             this.rollDie(i);
           }
         },
-        
+
         /**
          * Adds a new die to the list of dice.
          */
-        addDie: function () {
-          this.dice.push({ selectedDie: 6, rolls: [], explosion: true, rolling:false});
+        addDie: function (selectedDie = 6, explosion = false) {
+          this.dice.push({
+            selectedDie: selectedDie,
+            rolls: [],
+            explosion: explosion,
+            rolling: false
+          });
         },
         /**
          * Removes a die from the list of dice.
@@ -138,17 +263,38 @@
          */
         removeDie: function (index) {
           this.dice.splice(index, 1);
-        }
+        },
+        removeDice: function () {
+          this.dice = [];
+          this.addDie();
+        },
+      },
+      beforeMount() {
+        this.removeDice();
       }
     })
   </script>
 
-<div id="app_fate" style="display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 800px; margin-left: auto; margin-right: auto;">
-  <h1>Fate Dice</h1>
-    <div><button v-on:click="rollFateDice" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Roll Fate Dice</button><span style="margin-left:20px; font-size: 40px; ">{{ action_rolls }}</span></div>
+  <!---------------------------------------------------------------------------------------------->
+  <!-- FATE DICE -->
+  <div id="app_fate" class="app"
+    style="display: flex; flex-direction: column; align-items: center; text-align: center; max-width: 800px; margin-left: auto; margin-right: auto; margin-top: 50px;">
+    <h1>⊞ Fate Dice ⊟</h1>
+    <div style="margin-bottom: 50px; display: flex; max-width: 500px; width: 100%;">
+      <button v-on:click="rollFateDice"
+        style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">Roll
+        Fate Dice
+      </button>
+      <span style="margin-left:10px; font-size: 40px; flex-grow: 1; display: flex; align-items: center; ">
+        <div v-if="rolling" style="text-align: center; width:100%; display: flex;">
+          <div class="rolling" v-for="i in [1,2,3,4]" style="margin-left: 30px;">{{fate_dice[1]}}</div>
+        </div>
+        <div v-else style="text-align: center; width: 100%;">{{ action_rolls }}</div>
+      </span>
+    </div>
   </div>
 
-  
+
   <!-- FILEPATH: /home/thomas/Documents/SWRandomizer/index.html -->
   <script>
     /**
@@ -159,91 +305,86 @@
       el: '#app_fate',
       data: {
         action_rolls: "⊡ ⊡ ⊡ ⊡ = 0",
-        opposition_rolls: "⊡ ⊡ ⊡ ⊡ = 0",
+        rolling: false,
+        fate_dice: ['⊟', '⊡', '⊞'],
       },
       computed: {
-        
+
       },
       methods: {
         // roll 4 fate dice (result: +, -, or blank) for both action and opposition
         // this.action_rolls is a string containing the results of the action roll and the sum (ex: '+-+_ = +1')
         // this.opposition_rolls is the same for opposition
         rollFateDice: function () {
+          if (this.rolling) return;
+          this.rolling = true;
+          setTimeout(() => {
+            this.rolling = false;
+          }, 600);
           var actionRolls = [];
-          var oppositionRolls = [];
           var actionTotal = 0;
-          var oppositionTotal = 0;
-          let map = ['⊟','⊡','⊞'];
+
           for (var i = 0; i < 4; i++) {
             var roll = Math.floor(Math.random() * 3) - 1;
-            actionRolls.push(map[roll+1]);
+            actionRolls.push(this.fate_dice[roll + 1]);
             actionTotal += roll;
-            roll = Math.floor(Math.random() * 3) - 1;
-            oppositionRolls.push(map[roll+1]);
-            oppositionTotal += roll;
           }
           this.action_rolls = actionRolls.join(' ') + ' = ' + actionTotal;
-          this.opposition_rolls = oppositionRolls.join(' ') + ' = ' + oppositionTotal;
         },
       }
     })
   </script>
 
-<style>
-  .card {
-    font-size: 72px;
-    text-align: center;
-    width: 100px;
-    height: 100px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin: 5px;
-    border: none;
-  }
+  <!---------------------------------------------------------------------------------------------->
+  <!-- CARDS DRAWER -->
+  <style>
+    .card {
+      font-size: 72px;
+      text-align: center;
+      width: 100px;
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 5px;
+      border: none;
+    }
 
-  .hand {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-    list-style: none;
-    padding: 0;
-  }
+    .hand {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      list-style: none;
+      padding: 0;
+    }
+  </style>
 
-  button:hover {
-    opacity: 0.9;
-  }
-  button:active {
-    opacity: 0.5;
-  }
-  .rolling{
-    animation: spin 0.6s linear infinite;
-  }
-  @keyframes spin {
-    0% { transform: translateX(-30px) translateY(-30px) rotate(0deg) ; }
-    33% { transform: translateX(-20px) translateY(0px) rotate(360deg) ; }
-    100% { transform: translateX(30px) translateY(0px) rotate(720deg) ; }
-  }
-</style>
+  <div id="app_card" class="app"
+    style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
+    <h1 style="display: flex;"><div style="transform: rotate(-20deg); margin-right: 5px;">🂡</div> Draw Cards <div style="transform: rotate(30deg); margin-left: 5px;">🃏</div> </h1>
+    <div>
+      <button v-on:click="resetDeck()"
+        style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer; margin-top: 20px; ">Shuffle</button>
+      <button v-on:click="reduceCards()"
+        style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer;  margin-left: 10px">-</button>
+      <span style="font-size: 24px; margin: 0 10px;">{{ numCards }}</span>
+      <button v-on:click="numCards++"
+        style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">+</button>
+      <button v-on:click="drawCards()"
+        style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-left: 10px;">Draw
+        Cards</button>
+    </div>
 
-<div id="app_card" style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 50px; max-width: 800px; margin-left: auto; margin-right: auto;">
-  <h1>Draw Cards</h1>
-  <div>
-  <button v-on:click="resetDeck()" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer; margin-top: 20px; ">Shuffle</button>
-  <button v-on:click="reduceCards()" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer;  margin-left: 10px">-</button>
-    <span style="font-size: 24px; margin: 0 10px;">{{ numCards }}</span>
-    <button v-on:click="numCards++" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer;">+</button>
-    <button v-on:click="drawCards()" style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-left: 10px;">Draw Cards</button>
+    <ul class="hand" style="min-height: 100px;">
+      <li v-for="card in cards" class="card" v-bind:style="{ color: getCardColor(card) }">{{ card.symbol }}</li>
+    </ul>
+    <div style="height: 25px;">
+      <p v-if="shuffled">Deck shuffled!</p>
+    </div>
   </div>
-
-  <ul class="hand">
-    <li v-for="card in cards" class="card" v-bind:style="{ color: getCardColor(card) }">{{ card.symbol }}</li>
-  </ul>
-    <p v-if="shuffled">Deck shuffled!</p>
-  </div>
-<!-- Your custom JavaScript code goes here -->
-<script>
+  <!-- Your custom JavaScript code goes here -->
+  <script>
     // Initialize Vue.js
     var app_dard = new Vue({
       el: '#app_card',
@@ -254,7 +395,7 @@
         shuffled: false,
       },
       methods: {
-        drawCards: function() {
+        drawCards: function () {
           var numCards = parseInt(this.numCards);
           if (numCards > this.deck.length) this.resetDeck();
           // reset deck if a joker is in the hand
@@ -271,25 +412,186 @@
             this.cards.push(card);
           }
         },
-        reduceCards: function(){
-          if(this.numCards > 1){
+        reduceCards: function () {
+          if (this.numCards > 1) {
             this.numCards--;
           }
         },
-        resetDeck: function() {
+        resetDeck: function () {
           this.shuffled = true;
           setTimeout(() => {
             this.shuffled = false;
           }, 1000);
           this.cards = [];
-          this.deck = [
-            { suit: 'hearts', symbol: '🂱' }, { suit: 'hearts', symbol: '🂲' }, { suit: 'hearts', symbol: '🂳' }, { suit: 'hearts', symbol: '🂴' }, { suit: 'hearts', symbol: '🂵' }, { suit: 'hearts', symbol: '🂶' }, { suit: 'hearts', symbol: '🂷' }, { suit: 'hearts', symbol: '🂸' }, { suit: 'hearts', symbol: '🂹' }, { suit: 'hearts', symbol: '🂺' }, { suit: 'hearts', symbol: '🂻' }, { suit: 'hearts', symbol: '🂽' }, { suit: 'hearts', symbol: '🂾' },
-            { suit: 'diamonds', symbol: '🃁' }, { suit: 'diamonds', symbol: '🃂' }, { suit: 'diamonds', symbol: '🃃' }, { suit: 'diamonds', symbol: '🃄' }, { suit: 'diamonds', symbol: '🃅' }, { suit: 'diamonds', symbol: '🃆' }, { suit: 'diamonds', symbol: '🃇' }, { suit: 'diamonds', symbol: '🃈' }, { suit: 'diamonds', symbol: '🃉' }, { suit: 'diamonds', symbol: '🃊' }, { suit: 'diamonds', symbol: '🃋' }, { suit: 'diamonds', symbol: '🃍' }, { suit: 'diamonds', symbol: '🃎' },
-            { suit: 'clubs', symbol: '🃑' }, { suit: 'clubs', symbol: '🃒' }, { suit: 'clubs', symbol: '🃓' }, { suit: 'clubs', symbol: '🃔' }, { suit: 'clubs', symbol: '🃕' }, { suit: 'clubs', symbol: '🃖' }, { suit: 'clubs', symbol: '🃗' }, { suit: 'clubs', symbol: '🃘' }, { suit: 'clubs', symbol: '🃙' }, { suit: 'clubs', symbol: '🃚' }, { suit: 'clubs', symbol: '🃛' }, { suit: 'clubs', symbol: '🃝' }, { suit: 'clubs', symbol: '🃞' },
-            { suit: 'spades', symbol: '🂡' }, { suit: 'spades', symbol: '🂢' }, { suit: 'spades', symbol: '🂣' }, { suit: 'spades', symbol: '🂤' }, { suit: 'spades', symbol: '🂥' }, { suit: 'spades', symbol: '🂦' }, { suit: 'spades', symbol: '🂧' }, { suit: 'spades', symbol: '🂨' }, { suit: 'spades', symbol: '🂩' }, { suit: 'spades', symbol: '🂪' }, { suit: 'spades', symbol: '🂫' }, { suit: 'spades', symbol: '🂭' }, { suit: 'spades', symbol: '🂮' }, { suit: 'joker', symbol: '🃏'},{ suit: 'joker', symbol: '🃏'}
+          this.deck = [{
+              suit: 'hearts',
+              symbol: '🂱'
+            }, {
+              suit: 'hearts',
+              symbol: '🂲'
+            }, {
+              suit: 'hearts',
+              symbol: '🂳'
+            }, {
+              suit: 'hearts',
+              symbol: '🂴'
+            }, {
+              suit: 'hearts',
+              symbol: '🂵'
+            }, {
+              suit: 'hearts',
+              symbol: '🂶'
+            }, {
+              suit: 'hearts',
+              symbol: '🂷'
+            }, {
+              suit: 'hearts',
+              symbol: '🂸'
+            }, {
+              suit: 'hearts',
+              symbol: '🂹'
+            }, {
+              suit: 'hearts',
+              symbol: '🂺'
+            }, {
+              suit: 'hearts',
+              symbol: '🂻'
+            }, {
+              suit: 'hearts',
+              symbol: '🂽'
+            }, {
+              suit: 'hearts',
+              symbol: '🂾'
+            },
+            {
+              suit: 'diamonds',
+              symbol: '🃁'
+            }, {
+              suit: 'diamonds',
+              symbol: '🃂'
+            }, {
+              suit: 'diamonds',
+              symbol: '🃃'
+            }, {
+              suit: 'diamonds',
+              symbol: '🃄'
+            }, {
+              suit: 'diamonds',
+              symbol: '🃅'
+            }, {
+              suit: 'diamonds',
+              symbol: '🃆'
+            }, {
+              suit: 'diamonds',
+              symbol: '🃇'
+            }, {
+              suit: 'diamonds',
+              symbol: '🃈'
+            }, {
+              suit: 'diamonds',
+              symbol: '🃉'
+            }, {
+              suit: 'diamonds',
+              symbol: '🃊'
+            }, {
+              suit: 'diamonds',
+              symbol: '🃋'
+            }, {
+              suit: 'diamonds',
+              symbol: '🃍'
+            }, {
+              suit: 'diamonds',
+              symbol: '🃎'
+            },
+            {
+              suit: 'clubs',
+              symbol: '🃑'
+            }, {
+              suit: 'clubs',
+              symbol: '🃒'
+            }, {
+              suit: 'clubs',
+              symbol: '🃓'
+            }, {
+              suit: 'clubs',
+              symbol: '🃔'
+            }, {
+              suit: 'clubs',
+              symbol: '🃕'
+            }, {
+              suit: 'clubs',
+              symbol: '🃖'
+            }, {
+              suit: 'clubs',
+              symbol: '🃗'
+            }, {
+              suit: 'clubs',
+              symbol: '🃘'
+            }, {
+              suit: 'clubs',
+              symbol: '🃙'
+            }, {
+              suit: 'clubs',
+              symbol: '🃚'
+            }, {
+              suit: 'clubs',
+              symbol: '🃛'
+            }, {
+              suit: 'clubs',
+              symbol: '🃝'
+            }, {
+              suit: 'clubs',
+              symbol: '🃞'
+            },
+            {
+              suit: 'spades',
+              symbol: '🂡'
+            }, {
+              suit: 'spades',
+              symbol: '🂢'
+            }, {
+              suit: 'spades',
+              symbol: '🂣'
+            }, {
+              suit: 'spades',
+              symbol: '🂤'
+            }, {
+              suit: 'spades',
+              symbol: '🂥'
+            }, {
+              suit: 'spades',
+              symbol: '🂦'
+            }, {
+              suit: 'spades',
+              symbol: '🂧'
+            }, {
+              suit: 'spades',
+              symbol: '🂨'
+            }, {
+              suit: 'spades',
+              symbol: '🂩'
+            }, {
+              suit: 'spades',
+              symbol: '🂪'
+            }, {
+              suit: 'spades',
+              symbol: '🂫'
+            }, {
+              suit: 'spades',
+              symbol: '🂭'
+            }, {
+              suit: 'spades',
+              symbol: '🂮'
+            }, {
+              suit: 'joker',
+              symbol: '🃏'
+            }, {
+              suit: 'joker',
+              symbol: '🃏'
+            }
           ];
         },
-        getCardColor: function(card) {
+        getCardColor: function (card) {
           if (card.suit === 'hearts' || card.suit === 'diamonds') {
             return 'red';
           } else {
@@ -298,7 +600,273 @@
         }
       }
     });
-    </script>
+  </script>
 
+  <!---------------------------------------------------------------------------------------------->
+  <!-- STAR WARS DICE POOL -->
+  <style>
+    .btnadd{
+      font-size: 20px; 
+      padding: 10px 20px; 
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+      width:55px;
+      height: 55px;
+      margin:0px 10px;
+    }
+    .marginplus{
+      margin-right: 30px;
+    }
+    .skillcheck div{
+      text-align: justify;
+    }
+  </style>
+
+  <div id="app_SWdice" class="app"
+    style="display: flex; flex-direction: column; align-items: center; text-align: center; margin-top: 20px; max-width: 800px; margin-left: auto; margin-right: auto; margin-top: 50px;">
+    <h1><span style="font-family: SWDice;">x</span> Star Wars: Edge of the Empire <span style="font-family: SWDice;">y</span></h1>
+    
+    <h3>Add dice to your pool: <button style=" border-radius: 10px; cursor: pointer; border:none; background-color: skyblue; color:white;"
+          v-on:click="showhelp = !showhelp"
+      ><b>?</b></button>
+    </h3>
+    <div v-if="showhelp" 
+      style="background-color: rgb(223, 227, 230); padding: 10px 10px; border-radius: 10px; max-width:500px; width:100%; margin-bottom:20px;" class="skillcheck"
+    >
+      <div style="display: flex; margin: 10px; justify-content: space-between;">
+        <div><b>Help: Making a skill check</b></div>
+        <button style=" border-radius: 10px; cursor: pointer; border:none; background-color: #f44336; color:white;"
+          v-on:click="showhelp = false"
+        ><b>⨯</b></button>
+      </div>
+      <div>1. Select the Skill and associated Characteristic</div>
+      <div>2. Add max(Skill,Characteristic) <span v-html="formatDie('ability')"></span> dice to the pool</div>
+      <div>3. Promote min(Skill,Characteristic) dice to <span v-html="formatDie('proficiency')"></span></div>
+      <div>4. Add <span v-html="formatDie('difficulty')"></span> dice according to the task's difficulty</div>
+      <div>5. Modify the pool: Add ➞ Upgrade ➞ Downgrade ➞ Remove</div>
+      <div>6. Roll the dice!</div>
+    </div>
+    <div style="display: flex; margin-bottom: 20px;">
+      <button v-for="(dieType, i) in Object.keys(dicemap)" :key="i"
+        :style="{color: dicemap[dieType].color}"
+        style="background-color: rgb(218, 226, 236); font-weight: bold;"
+        class="btnadd"
+        v-on:click="addDie(dieType)"
+        :title="capitalize(dieType)"
+        :class="{ marginplus: dieType == 'proficiency' || dieType == 'challenge'}"
+        > 
+        {{dicemap[dieType].icon}}
+      </button>
+    </div>
+    <div style="max-width: 400px; width:100%;">
+      <div style="display: grid; grid-template-columns: repeat(1, 1fr); grid-gap: 20px; width: 100%;">
+        <div v-for="(die, index) in dice" :key="index" style="display: flex; grid-gap: 5px; align-items: center;">
+
+          <div style="display: flex;">
+            <select :id="'dice-select-' + index" v-model="die.selectedDie"
+              style="font-size: 24px; padding: 10px 20px; border-radius: 5px; color: white; border: none; cursor: pointer; display: block;"
+              :style="{ backgroundColor: dieColor(index) }">
+
+              <option v-for="(dieType, i) in Object.keys(dicemap)" :key="i" :value="dieType"
+                :style="{color: dicemap[dieType].color}" style="background-color: white;" class="swoption">
+                {{dicemap[dieType].icon}}  {{ capitalize(dieType) }}
+              </option>
+            </select>
+          </div>
+          <div
+            style="display: flex; flex-grow:1; justify-content: center; align-items: center; width: 100px; border-radius: 10px; height: 50px; border: 4px solid #4CAF50; text-align: center; font-size: 28px; font-family: SWDice;"
+            :style="{ borderColor: dieColor(index) }">
+            <span :class="{ rolling: die.rolling }" :style="{ color: dieColor(index)}">{{ printDie(index) }}</span>
+          </div>
+          <button v-on:click="rollDie(index)"
+            style="font-size: 24px; padding: 10px 20px; border-radius: 5px;; color: white; border: none; cursor: pointer; width:50px;"
+            :style="{ backgroundColor: dieColor(index) }">⟳</button>
+          <button v-on:click="removeDie(index)"
+            style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer; width:50px;">-</button>
+        </div>
+      </div>
+      <div style="display: flex; justify-content: center; align-items: center; width: 100%;">
+        <!-- <button v-on:click="addDie()"
+          style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-right: 10px;">+</button> -->
+        <button v-on:click="rollDice"
+          style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #4CAF50; color: white; border: none; cursor: pointer; margin-top: 20px; margin-left: 10px;margin-right: 10px; flex-grow: 1;">Roll
+          Dice</button>
+        <button v-on:click="removeDice"
+          style="font-size: 24px; padding: 10px 20px; border-radius: 5px; background-color: #f44336; color: white; border: none; cursor: pointer; margin-top: 20px; margin-left: 10px;"
+          title="remove all dice">reset</button>
+      </div>
+    </div>
+    <div style="min-height:120px; margin-top: 30px;">
+      <h2 style="font-size: 36px; margin-top: 10px; font-family: SWDice;">{{ rolls }}</h2>
+    </div>
+  </div>
+
+
+  <!-- FILEPATH: /home/thomas/Documents/SWRandomizer/index.html -->
+  <script>
+    /**
+     * Vue app for rolling dice.
+     * @namespace
+     */
+    var app_SWdice = new Vue({
+      el: '#app_SWdice',
+      data: {
+        showhelp: false,
+        dice: [],
+        dicemap: {
+          "boost": {
+            outcomes: ['B', 'B', 's', 'sa', 'a a', 'a '],
+            color: 'skyblue',
+            shape: 'B',
+            icon: '■',
+          },
+          "ability": {
+            outcomes: ['B', 's', 's', 's s', 'a', 'a', 'sa', 'aa'],
+            color: 'seagreen',
+            shape: 'D',
+            icon: '⧫',
+          },
+          "proficiency": {
+            outcomes: ['B', 's', 's', 'ss', 'ss', 'a ', 'sa', 'sa', 'sa', 'aa', 'aa', 'x'],
+            color: 'orange',
+            shape: 'C',
+            icon: '⬣',
+          },
+          "setback": {
+            outcomes: ['B', 'B', 'f', 'f', 't', 't'],
+            color: 'DarkSlateGray',
+            shape: 'B',
+            icon: '■',
+          },
+          "difficulty": {
+            outcomes: ['B', 'f', 'ff', 't', 't', 't', 'tf', 'tt'],
+            color: 'indigo',
+            shape: 'D',
+            icon: '⧫',
+          },
+          "challenge": {
+            outcomes: ['B', 'f', 'f', 'ff', 'ff', 't', 't', 'tf', 'tf', 'tt', 'tt', 'y'],
+            color: 'OrangeRed',
+            shape: 'C',
+            icon: '⬣',
+          },
+          "force": {
+            outcomes: ['z', 'z', 'z', 'z', 'z', 'z', 'zz', 'Z', 'Z', 'ZZ', 'ZZ', 'ZZ'],
+            color: 'LightSlateGray',
+            shape: 'C',
+            icon: '⬡',
+          },
+        },
+      },
+      computed: {
+        /**
+         * Fills the rolls array for each die.
+         * @returns {Array} - The rolls array for each die.
+         */
+        rolls: function () {
+          var totalRolls = '';
+          for (var i = 0; i < this.dice.length; i++) {
+            var die = this.dice[i].roll;
+            // totalRolls.push(die);
+            if (die == 'B') continue;
+            totalRolls += die;
+          }
+          totalRolls = totalRolls.split('').sort()
+          // return totalRolls.join(' ');
+          res_counts={"s":0,"f":0,"t":0,"a":0,"x":0,"y":0,"z":0,"Z":0};
+          for (var i = 0; i < totalRolls.length; i++) {
+            res_counts[totalRolls[i]]++;
+          }
+          var successes = Math.max(0,res_counts["s"]-res_counts["f"]);
+          var advantages = Math.max(0,res_counts["a"]-res_counts["t"]);
+          var failures = Math.max(0,res_counts["f"]-res_counts["s"]);
+          var threats = Math.max(0,res_counts["t"]-res_counts["a"]);
+          res_counts["s"]=successes;
+          res_counts["a"]=advantages;
+          res_counts["f"]=failures;
+          res_counts["t"]=threats;
+          var res_string = "";
+          Object.keys(res_counts).forEach(k => {
+            count=res_counts[k];
+            if (count>0){
+              res_string+=k.repeat(count);
+            }
+          })
+          return res_string.split('').join(' ');
+        }
+      },
+      methods: {
+        formatDie(dieType) {
+          return `<span style="color:${this.dicemap[dieType.toLowerCase()].color}">`+this.dicemap[dieType.toLowerCase()].icon+" "+this.capitalize(dieType)+"</span>";
+        },
+        capitalize(string) {
+          return string.charAt(0).toUpperCase() + string.slice(1);
+        },
+        printDie: function (dieIndex) {
+          if (this.dice[dieIndex].rolling) {
+            return this.dicemap[this.dice[dieIndex].selectedDie].icon.toUpperCase();
+          }
+          return ('' + this.dice[dieIndex].roll).split('').sort().join(' ');
+        },
+        dieColor: function (dieIndex) {
+          return this.dicemap[this.dice[dieIndex].selectedDie].color;
+        },
+        /**
+         * Rolls a single die
+         */
+        rollDie: function (dieIndex) {
+          if (this.dice[dieIndex].rolling) return;
+          this.dice[dieIndex].rolling = true;
+          this.dice[dieIndex].roll = '';
+          var outcomes = this.dicemap[this.dice[dieIndex].selectedDie].outcomes;
+          var index = Math.floor(Math.random() * outcomes.length);
+          setTimeout(() => {
+            this.dice[dieIndex].roll = outcomes[index];
+            this.dice[dieIndex].rolling = false;
+          }, 600);
+        },
+
+        /**
+         * Rolls the dice and updates the rolls and totals.
+         */
+        rollDice: function () {
+          for (var i = 0; i < this.dice.length; i++) {
+            this.rollDie(i);
+          }
+        },
+
+        /**
+         * Adds a new die to the list of dice.
+         */
+        addDie: function (selectedDie="ability") {
+          this.dice.push({
+            selectedDie: selectedDie,
+            roll: '',
+            rolling: false
+          });
+          // this.rollDie(this.dice.length-1);
+        },
+        /**
+         * Removes a die from the list of dice.
+         * @param {number} index - The index of the die to remove.
+         */
+        removeDie: function (index) {
+          this.dice.splice(index, 1);
+        },
+        removeDice: function () {
+          this.dice = [];
+          // this.addDie("ability");
+          // this.addDie("difficulty");
+        },
+      },
+      beforeMount() {
+        this.removeDice();
+      },
+    })
+  </script>
+
+  <!---------------------------------------------------------------------------------------------->
 </body>
+
 </html>
