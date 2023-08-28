@@ -7,10 +7,10 @@
   <!-- Load Vue.js via CDN -->
   <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
   <link rel="stylesheet" href="https://cdn.rawgit.com/fponticelli/dicefont/fc6b8c47/dist/dicefont/dicefont.css">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
-  <link rel="manifest" href="/site.webmanifest">
+  <link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+  <link rel="manifest" href="site.webmanifest">
 </head>
 
 <body>
@@ -192,7 +192,7 @@
         },
         printDie: function (dieIndex) {
           // if (this.dice[dieIndex].rolling) return "🎲";
-          if (this.dice[dieIndex].rolling) return this.dieString(this.dice[dieIndex].selectedDie, 2, true);
+          if (this.dice[dieIndex].rolling) return this.dieString(this.dice[dieIndex].selectedDie, this.dice[dieIndex].selectedDie, true);
           var totalRolls = [];
           var total = 0;
           let nroll = this.dice[dieIndex].rolls.length;
